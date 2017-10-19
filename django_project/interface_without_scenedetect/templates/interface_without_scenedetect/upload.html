@@ -1,0 +1,24 @@
+<h1>uploader une nouvelle video</h1>
+
+
+{% if uploaded %}
+
+    <p>uploading videofile</p>
+
+{% endif %}
+
+
+
+<p>
+
+    <form method="post" enctype="multipart/form-data" action=".">
+
+       {% csrf_token %}
+
+       {{ form.as_p }}
+
+       <input type="submit"/>
+
+    </form>
+
+</p>
