@@ -1,3 +1,5 @@
 # ignore following files
 
 *.pyc
+*.mp4
+*.mkv
