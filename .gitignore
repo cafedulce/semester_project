@@ -4,4 +4,5 @@
 *.mp4
 *.mkv
 *.jpg
+*.sqlite3
 import_scene.py
