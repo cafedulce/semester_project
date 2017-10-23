@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.http import HttpResponse
 
 from interface.forms import VideoForm
@@ -44,9 +45,10 @@ def upload(request):
 
         scene_detectors = scenedetect.detectors.get_available()
 
-        smgr_content = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
+        sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
 
-        fps, read, processed = scenedetect.detect_scenes_file(path=scenedetect_object.name, scene_manager=smgr_content)
+        fps, read, processed = scenedetect.detect_scenes_file(path=scenedetect_object.name, scene_manager=sc_man)
 
+        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man})
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})

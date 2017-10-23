@@ -1,13 +1,4 @@
-<h1>uploader une nouvelle video</h1>
-
-
-{% if uploaded %}
-
-    <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
-
-{% endif %}
-
-
+<h1>upload a video</h1>
 
 <p>
 
@@ -22,3 +13,12 @@
     </form>
 
 </p>
+
+{% if uploaded %}
+
+    <h1>result of the uploaded video</h1>
+
+    <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
+    <p>scene_list() = {{scene_manager.scene_list}}</p>
+
+{% endif %}
