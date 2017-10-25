@@ -26,14 +26,18 @@ def upload(request):
 
     fps, read, processed = 0,0,0
 
+    media_path = "/media/video_files/"
+
     if form.is_valid():
         video_file = VideoFile()
         video_file.video = form.cleaned_data["video"]
+        video_file.name = video_file.video_name()
+        video_file.path = media_path+video_file.name
         video_file.save()
         uploaded=True
 
         scenedetect_object = PySceneDetectArgs()
-        scenedetect_object.name = (video_file.video.path)
+        scenedetect_object.name = (video_file.video.path)  #absolute path
         scenedetect_object.type = 'content'
         scenedetect_object.threshold = 30
         scenedetect_object.save_images = False
@@ -49,6 +53,10 @@ def upload(request):
 
         fps, read, processed = scenedetect.detect_scenes_file(path=scenedetect_object.name, scene_manager=sc_man)
 
-        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man})
+        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path})
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
+
+def test(request):
+
+    return render(request, 'interface/test.html')

@@ -18,9 +18,15 @@ from django.contrib import admin
 
 from interface import views
 
+#pour afficher les videos dans /MEDIA
+from django.conf.urls.static import static
+from django.conf import settings
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^interface/', include('interface.urls')),
-]
+    ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
