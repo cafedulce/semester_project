@@ -35,9 +35,14 @@ def upload(request):
         video_file.video = form.cleaned_data["video"]
         video_file.name = video_file.video_name()
         video_file.path = media_path+video_file.name
-        video_file.absolute_path = video_file.video.path
+        video_file.absolute_path = '/home/dulce/semester_project/django_project/'+video_file.path
+        #video_file.absolute_path = video_file.video.path
         video_file.save()
         uploaded=True
+        #test
+        print(video_file.name)
+        print(video_file.path)
+        print(video_file.absolute_path)
 
         scenedetect_object = PySceneDetectArgs()
         scenedetect_object.name = video_file.absolute_path
