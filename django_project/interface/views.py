@@ -35,13 +35,8 @@ def upload(request):
         video_file.video = form.cleaned_data["video"]
         video_file.name = video_file.video_name()
         video_file.path = media_path+video_file.name
-<<<<<<< HEAD
-        video_file.absolute_path = '/home/dulce/semester_project/django_project/'+video_file.path
-        #video_file.absolute_path = video_file.video.path
-=======
         video_file.absolute_path = '/home/dulce/semester_project/django_project/' + video_file.path
         # video_file.absolute_path = video_file.video.path
->>>>>>> form_upgrading
         video_file.save()
         uploaded=True
         #test
