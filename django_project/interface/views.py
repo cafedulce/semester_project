@@ -8,7 +8,7 @@ from interface.forms import VideoForm
 from interface.models import VideoFile
 from interface.models import PySceneDetectArgs
 
-from interface.scripts import split
+from interface.scripts import *
 
 import scenedetect
 
@@ -29,13 +29,14 @@ def upload(request):
     fps, read, processed = 0,0,0
 
     media_path = "/media/video_files/"
+    project_path = "/home/dulce/semester_project/django_project"
 
     if form.is_valid():
         video_file = VideoFile()
         video_file.video = form.cleaned_data["video"]
         video_file.name = video_file.video_name()
         video_file.path = media_path+video_file.name
-        video_file.absolute_path = '/home/dulce/semester_project/django_project/' + video_file.path
+        video_file.absolute_path = project_path + video_file.path
         # video_file.absolute_path = video_file.video.path
         video_file.save()
         uploaded=True
@@ -61,7 +62,10 @@ def upload(request):
 
         fps, read, processed = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
 
-        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path})
+        list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut')
+        print(list)
+
+        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
 

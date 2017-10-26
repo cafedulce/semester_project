@@ -3,8 +3,10 @@
 <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
 <p>scene_list() = {{scene_manager.scene_list}}</p>
 
-<video width="320" height="240" controls>
-  <source src={{path}} type="video/mp4">
-  video not supported
-</video>
-
+<h3>splitted videos</h3>
+{% for video in list %}
+      <video width="320" height="240" controls>
+        <source src={{video}} type="video/mp4">
+        video not supported
+      </video>
+{% endfor %}
