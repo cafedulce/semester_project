@@ -54,7 +54,7 @@ def upload(request):
 
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
 
-        fps, read, processed = scenedetect.detect_scenes_file(path=scenedetect_object.name, scene_manager=sc_man)
+        fps, read, processed = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
 
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path})
 
