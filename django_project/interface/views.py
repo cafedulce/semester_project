@@ -8,6 +8,8 @@ from interface.forms import VideoForm
 from interface.models import VideoFile
 from interface.models import PySceneDetectArgs
 
+from interface.scripts import split
+
 import scenedetect
 
 # Create your views here.
@@ -33,11 +35,12 @@ def upload(request):
         video_file.video = form.cleaned_data["video"]
         video_file.name = video_file.video_name()
         video_file.path = media_path+video_file.name
+        video_file.absolute_path = video_file.video.path
         video_file.save()
         uploaded=True
 
         scenedetect_object = PySceneDetectArgs()
-        scenedetect_object.name = (video_file.video.path)  #absolute path
+        scenedetect_object.name = video_file.absolute_path
         scenedetect_object.type = 'content'
         scenedetect_object.threshold = 30
         scenedetect_object.save_images = False
@@ -59,4 +62,7 @@ def upload(request):
 
 def test(request):
 
-    return render(request, 'interface/test.html')
+    split('/home/dulce/semester_project/django_project/media/video_files/goldeneye.mp4', '/home/dulce/semester_project/django_project/media/video_files/cut.mp4', 200, 300)
+    path = '/media/video_files/cut.mp4'
+
+    return render(request, 'interface/test.html', {'path': path})

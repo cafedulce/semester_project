@@ -6,6 +6,7 @@ class VideoFile(models.Model):
 
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=255, default='.')
+    absolute_path = models.CharField(max_length=255, default='.')
     video = models.FileField(upload_to='video_files/')
 
     def __str__ (self):
