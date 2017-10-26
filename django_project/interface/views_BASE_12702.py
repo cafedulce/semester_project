@@ -35,19 +35,9 @@ def upload(request):
         video_file.video = form.cleaned_data["video"]
         video_file.name = video_file.video_name()
         video_file.path = media_path+video_file.name
-<<<<<<< HEAD
-        video_file.absolute_path = '/home/dulce/semester_project/django_project/'+video_file.path
-        #video_file.absolute_path = video_file.video.path
-=======
-        video_file.absolute_path = '/home/dulce/semester_project/django_project/' + video_file.path
-        # video_file.absolute_path = video_file.video.path
->>>>>>> form_upgrading
+        video_file.absolute_path = video_file.video.path
         video_file.save()
         uploaded=True
-        #test
-        print(video_file.name)
-        print(video_file.path)
-        print(video_file.absolute_path)
 
         scenedetect_object = PySceneDetectArgs()
         scenedetect_object.name = video_file.absolute_path
@@ -64,7 +54,7 @@ def upload(request):
 
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
 
-        fps, read, processed = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
+        fps, read, processed = scenedetect.detect_scenes_file(path=scenedetect_object.name, scene_manager=sc_man)
 
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path})
 
