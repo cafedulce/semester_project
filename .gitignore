@@ -5,4 +5,5 @@
 *.mkv
 *.jpg
 *.sqlite3
+*.odp
 import_scene.py
