@@ -11,8 +11,12 @@ from interface.models import PySceneDetectArgs
 from interface.scripts import *
 
 import scenedetect
+import csv
 
 # Create your views here.
+
+media_path = "/media/video_files/"
+project_path = "/home/dulce/semester_project/django_project"
 
 def home(request):
     #provisory
@@ -28,33 +32,10 @@ def upload(request):
 
     fps, read, processed = 0,0,0
 
-    media_path = "/media/video_files/"
-    project_path = "/home/dulce/semester_project/django_project"
 
     if form.is_valid():
-        video_file = VideoFile()
-        video_file.video = form.cleaned_data["video"]
-        video_file.name = video_file.video_name()
-        video_file.path = media_path+video_file.name
-        video_file.absolute_path = project_path + video_file.path
-        # video_file.absolute_path = video_file.video.path
-        video_file.save()
-        uploaded=True
-        #test
-        print(video_file.name)
-        print(video_file.path)
-        print(video_file.absolute_path)
 
-        scenedetect_object = PySceneDetectArgs()
-        scenedetect_object.name = video_file.absolute_path
-        scenedetect_object.type = 'content'
-        scenedetect_object.threshold = 30
-        scenedetect_object.save_images = False
-        scenedetect_object.quiet_mode = True
-        scenedetect_object.stats_file = False
-        scenedetect_object.start_time = None
-        scenedetect_object.end_time = None
-        scenedetect_object.duration = None
+        video_file, scenedetect_object = form_cleaner(form, media_path, project_path)
 
         scene_detectors = scenedetect.detectors.get_available()
 
@@ -62,8 +43,10 @@ def upload(request):
 
         fps, read, processed = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
 
-        list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut')
-        print(list)
+        output_file(sc_man, scenedetect_object.output_file ,fps, read)
+
+        """list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut')
+        print(list)"""
 
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
 
@@ -71,7 +54,15 @@ def upload(request):
 
 def test(request):
 
-    split('/home/dulce/semester_project/django_project/media/video_files/goldeneye.mp4', '/home/dulce/semester_project/django_project/media/video_files/cut.mp4', 200, 300)
-    path = '/media/video_files/cut.mp4'
+    path_to_file = project_path + '/stats_file'
+    f = open(path_to_file, 'r')
+    response = HttpResponse(f, content_type='text/csv')
+    """response['Content-Disposition'] = 'attachment; filename=filename'"""
+    return response
 
-    return render(request, 'interface/test.html', {'path': path})
+def download(request):
+    path_to_file = project_path+'/stats_file'
+    f = open(path_to_file, 'r')
+    response = HttpResponse(f, content_type='application/csv')
+    """response['Content-Disposition'] = 'attachment; filename=filename'"""
+    return response

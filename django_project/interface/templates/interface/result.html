@@ -1,12 +1,15 @@
-<h1>Result page</h1>
+<h1>result page</h1>
 
 <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
 <p>scene_list() = {{scene_manager.scene_list}}</p>
 
+<h2>parameters used</h2>
+<p>detection algorithm = {{scene_manager.detection_method}} , threshold = {{scene_manager.args.threshold}}, downscale factor = {{scene_manager.downscale_factor}}, frame skip = {{scene_manager.frame_skip}}</p>
+
 <h3>splitted videos</h3>
-{% for video in list %}
+<!--{% for video in list %}
       <video width="320" height="240" controls>
         <source src={{video}} type="video/mp4">
         video not supported
       </video>
-{% endfor %}
+{% endfor %}-->
