@@ -13,8 +13,8 @@ class VideoForm(forms.Form):
     #save_images = forms.BooleanField(required=False, initial=False)
     #quiet_mode = forms.BooleanField(required=False, initial=False)
 
-    downscale = forms.IntegerField(required=False, initial=1)
-    frameskip = forms.IntegerField(required=False, initial=2)
+    downscale = forms.IntegerField(required=False, initial=5, help_text='(default=5)')
+    #frameskip = forms.IntegerField(required=False, initial=2)
 
     #start_time = forms.TimeField(required=False)
     #end_time = forms.TimeField(required=False)

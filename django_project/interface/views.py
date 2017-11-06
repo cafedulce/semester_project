@@ -45,8 +45,8 @@ def upload(request):
 
         output_file(sc_man, scenedetect_object.output_file ,fps, read)
 
-        """list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut')
-        print(list)"""
+        list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut', sc_man.frame_skip, read)
+        """number = split_input_video(video_file.absolute_path, media_path+'split', sc_man, fps)"""
 
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
 

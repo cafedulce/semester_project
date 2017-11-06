@@ -6,4 +6,6 @@
 *.jpg
 *.sqlite3
 *.odp
+*.odt
 import_scene.py
+django_project/interface/migrations/
