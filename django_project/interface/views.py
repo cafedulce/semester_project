@@ -54,11 +54,8 @@ def upload(request):
 
 def test(request):
 
-    path_to_file = project_path + '/stats_file'
-    f = open(path_to_file, 'r')
-    response = HttpResponse(f, content_type='text/csv')
-    """response['Content-Disposition'] = 'attachment; filename=filename'"""
-    return response
+    file = project_path+media_path+'goldeneye.mp4'
+    return render(request, 'interface/test.html', {'file':file})
 
 def download(request):
     path_to_file = project_path+'/stats_file'
