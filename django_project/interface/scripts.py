@@ -3,6 +3,13 @@ import csv
 from interface.models import VideoFile
 from interface.models import PySceneDetectArgs
 from interface.forms import VideoForm
+
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+import os
+import sys
+import subprocess as sp
+from moviepy.tools import subprocess_call
+
 import scenedetect
 
 def split(capture, output_filename, first_frame, last_frame, fps, size):
@@ -135,3 +142,31 @@ def split_input_video(input_path, output_path, smgr, video_fps):
             print('[PySceneDetect] Finished writing scenes to output.')
 
     return number
+
+def ffmpeg_split(file_path, list, filename, target, fps, read):
+
+    list.append(read)
+    name_list = []
+    begin = 0
+    for current in list:
+        t2 = current-begin
+        t1 = frames_to_timecode(begin, fps)
+        t2 = frames_to_timecode(t2, fps)
+        print(t1,t2)
+        tar=file_path+target+str(begin)+'.mp4'
+        name_list.append(tar)
+        #ffmpeg_extract_subclip(file_path+filename, t1, t2, targetname=tar)
+        cmd = ["ffmpeg","-ss",t1,"-i",file_path+filename,"-t",t2,"-vcodec","copy","-acodec","copy",tar]
+        subprocess_call(cmd)
+        begin = current
+
+    return name_list
+
+def convert_seconds_to_timeformat(a):
+    minute, second = divmod(a, 60)
+    hour, minute = divmod(minute, 60)
+    return str(hour)+str(minute)+str(second)
+
+def frames_to_timecode(frames, fps):
+    frame = int(frames)
+    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))

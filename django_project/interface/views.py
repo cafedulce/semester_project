@@ -45,8 +45,9 @@ def upload(request):
 
         output_file(sc_man, scenedetect_object.output_file ,fps, read)
 
-        list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut', sc_man.frame_skip, read)
+        """list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut', sc_man.frame_skip, read)"""
         """number = split_input_video(video_file.absolute_path, media_path+'split', sc_man, fps)"""
+        list = ffmpeg_split(project_path+media_path, sc_man.scene_list, video_file.name, 'cut', fps, read)
 
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
 
@@ -54,11 +55,8 @@ def upload(request):
 
 def test(request):
 
-    path_to_file = project_path + '/stats_file'
-    f = open(path_to_file, 'r')
-    response = HttpResponse(f, content_type='text/csv')
-    """response['Content-Disposition'] = 'attachment; filename=filename'"""
-    return response
+    file = project_path+media_path+'goldeneye.mp4'
+    return render(request, 'interface/test.html', {'file': file})
 
 def download(request):
     path_to_file = project_path+'/stats_file'
