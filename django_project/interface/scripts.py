@@ -9,6 +9,7 @@ import os
 import sys
 import subprocess as sp
 from moviepy.tools import subprocess_call
+from operator import truediv
 
 import scenedetect
 
@@ -143,20 +144,22 @@ def split_input_video(input_path, output_path, smgr, video_fps):
 
     return number
 
-def ffmpeg_split(file_path, list, filename, target, fps, read):
+def ffmpeg_split(project_path, media_path, list, filename, target, fps, read):
 
     list.append(read)
     name_list = []
     begin = 0
     for current in list:
         t2 = current-begin
-        t1 = frames_to_timecode(begin, fps)
-        t2 = frames_to_timecode(t2, fps)
-        print(t1,t2)
-        tar=file_path+target+str(begin)+'.mp4'
+        t1 = frames_to_second(begin, fps)
+        print('start time :', t1)
+        t2 = frames_to_second(t2, fps)
+        print('stop time :', t2)
+        tar=media_path+target+str(begin)+'.mp4'
         name_list.append(tar)
+        tar = project_path+tar
         #ffmpeg_extract_subclip(file_path+filename, t1, t2, targetname=tar)
-        cmd = ["ffmpeg","-ss",t1,"-i",file_path+filename,"-t",t2,"-vcodec","copy","-acodec","copy",tar]
+        cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy",tar]
         subprocess_call(cmd)
         begin = current
 
@@ -170,3 +173,6 @@ def convert_seconds_to_timeformat(a):
 def frames_to_timecode(frames, fps):
     frame = int(frames)
     return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))
+
+def frames_to_second(frames, fps):
+    return truediv(frames, fps)
