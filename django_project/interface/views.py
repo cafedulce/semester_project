@@ -50,7 +50,7 @@ def upload(request):
         """list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut', sc_man.frame_skip, read)"""
         """number = split_input_video(video_file.absolute_path, media_path+'split', sc_man, fps)"""
         list = ffmpeg_split(project_path,media_path, sc_man.scene_list, video_file.name, output_name, output_format, fps, read)
-        print(list)
+
         return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
