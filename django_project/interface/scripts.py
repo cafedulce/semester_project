@@ -167,7 +167,7 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
         #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
         #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
         #cmd = ["ffmpeg", "-i", project_path+media_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
-        cmd = ["ffmpeg","-i",input_name,"-c:v","copy","-ss",str(t1),"-t",str(t2),"-y",tar]
+        cmd = ["ffmpeg","-i",input_name,"-c:av","copy","-ss",str(t1),"-t",str(t2),"-y",tar]
         subprocess_call(cmd)
 
         begin = current
