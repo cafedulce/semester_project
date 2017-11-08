@@ -144,7 +144,13 @@ def split_input_video(input_path, output_path, smgr, video_fps):
 
     return number
 
-def ffmpeg_split(project_path, media_path, list, filename, target, fps, read):
+def ffmpeg_split(project_path, media_path, list, filename, output_name, output_format, fps, read):
+
+    #convert mkv file to mp4
+    """input_name = project_path+media_path+'converted.mkv'
+    cmd = ["ffmpeg","-i",project_path+media_path+filename,"-c:a","aac","-c:v","copy","-y",input_name]
+    subprocess_call(cmd)"""
+    input_name = project_path+media_path+filename
 
     list.append(read)
     name_list = []
@@ -155,12 +161,15 @@ def ffmpeg_split(project_path, media_path, list, filename, target, fps, read):
         print('start time :', t1)
         t2 = frames_to_second(t2, fps)
         print('stop time :', t2)
-        tar=media_path+target+str(begin)+'.mp4'
+        tar=media_path+output_name+str(begin)+output_format
         name_list.append(tar)
         tar = project_path+tar
-        #ffmpeg_extract_subclip(file_path+filename, t1, t2, targetname=tar)
-        cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy",tar]
+        #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
+        #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
+        #cmd = ["ffmpeg", "-i", project_path+media_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
+        cmd = ["ffmpeg","-i",input_name,"-c:v","h264","-c:a","aac","-ss",str(t1),"-t",str(t2),"-y",tar]
         subprocess_call(cmd)
+
         begin = current
 
     return name_list
