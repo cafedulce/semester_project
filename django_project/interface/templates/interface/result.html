@@ -6,13 +6,20 @@
 <p>detection algorithm = {{det}} , threshold = {{thres}}, downscale factor = {{down}}</p>
 
 <h3>splitted videos</h3>
-<ul>
-{% for video in list %}
-    <li>
-      <video width="320" height="240" controls>
-        <source src={{video}} type="video/mp4">
-        video not supported
-      </video>
-    </li>    
-{% endfor %}
-</ul>
+<form method="post">
+       {% csrf_token %}
+       <input type="submit" name="combine"/>
+    <ul>
+    {% for video in vlist %}
+        <li>
+          <p>{{video|slice:"19:"}}</p>
+          <video width="320" height="240" controls played>
+            <source src={{video}} type="video/mp4">
+            video not supported
+          </video>
+          <input type="checkbox" name="combine[]" value={{video}} />
+        </li>
+    {% endfor %}
+    </ul>
+
+</form>

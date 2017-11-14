@@ -153,7 +153,8 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
     #input_name = project_path+media_path+filename
 
     list.append(read)
-    name_list = []
+    media_name_list = []
+
     begin = 0
     for current in list:
         t2 = current-begin
@@ -162,7 +163,7 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
         t2 = frames_to_second(t2, fps)
         print('stop time :', t2)
         tar=media_path+output_name+str(begin)+output_format
-        name_list.append(tar)
+        media_name_list.append(tar)
         tar = project_path+tar
         #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
         #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
@@ -172,7 +173,7 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
 
         begin = current
 
-    return name_list
+    return media_name_list
 
 def convert_seconds_to_timeformat(a):
     minute, second = divmod(a, 60)
@@ -185,3 +186,23 @@ def frames_to_timecode(frames, fps):
 
 def frames_to_second(frames, fps):
     return truediv(frames, fps)
+
+def combine(video_list, to_combine_list, project_path, media_path):
+    while len(to_combine_list) >= 2:
+        indexa = video_list.index(to_combine_list[0])
+        indexb = video_list.index(to_combine_list[1])
+        if abs(indexa-indexb) > 1:
+            to_combine_list.pop(0)
+        else:
+            a = project_path+to_combine_list[0]
+            b = project_path+to_combine_list[1]
+            o = media_path+"temp.mp4"
+            arg = '[0:v:0] [1:v:0] concat=n=2:v=1 [v]'
+            cmd = ["ffmpeg","-i",a,"-i",b,"-filter_complex",arg,"-map","[v]","-y",project_path+o]
+            subprocess_call(cmd)
+            video_list.pop(indexa)
+            video_list.pop(indexb)
+            video_list.insert(indexa, o)
+            to_combine_list.pop(0)
+            to_combine_list.pop(0)
+    return video_list

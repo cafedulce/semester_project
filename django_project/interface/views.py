@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
 
 from interface.forms import VideoForm
 from interface.models import VideoFile
@@ -42,12 +44,12 @@ def upload(request):
 
         output_format = '.mp4'
         output_name = 'shot'
-        list = ffmpeg_split(project_path,media_path, sc_man.scene_list, video_file.name, output_name, output_format, f_r_p[0], f_r_p[1])
+        video_list = ffmpeg_split(project_path,media_path, sc_man.scene_list, video_file.name, output_name, output_format, f_r_p[0], f_r_p[1])
 
         request.session['fps_read_proc'] = f_r_p
         request.session['det_thres_down'] = (sc_man.detection_method,sc_man.args.threshold,sc_man.downscale_factor)
-        request.session['video_list'] = list
-        
+        request.session['video_list'] = video_list
+
         return redirect(result)
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
@@ -56,8 +58,15 @@ def result(request):
 
     frp = request.session.get('fps_read_proc')
     dtd = request.session.get('det_thres_down')
-    list = request.session.get('video_list')
-    return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'list':list})
+    video_list = request.session.get('video_list')
+
+    to_combine = request.POST.getlist('combine[]')
+    if to_combine:
+        video_list = combine(video_list, to_combine, project_path, media_path)
+        request.session['video_list'] = video_list
+        return redirect(result)
+
+    return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list))})
 
 def test(request):
     print(request.session.get('atest'))
