@@ -8,8 +8,10 @@
 
 <h3>splitted videos</h3>
 {% for video in list %}
+    <li>
       <video width="320" height="240" controls>
         <source src={{video}} type="video/mp4">
         video not supported
       </video>
+    </li>    
 {% endfor %}

@@ -3,6 +3,14 @@ import csv
 from interface.models import VideoFile
 from interface.models import PySceneDetectArgs
 from interface.forms import VideoForm
+
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+import os
+import sys
+import subprocess as sp
+from moviepy.tools import subprocess_call
+from operator import truediv
+
 import scenedetect
 
 def split(capture, output_filename, first_frame, last_frame, fps, size):
@@ -135,3 +143,45 @@ def split_input_video(input_path, output_path, smgr, video_fps):
             print('[PySceneDetect] Finished writing scenes to output.')
 
     return number
+
+def ffmpeg_split(project_path, media_path, list, filename, output_name, output_format, fps, read):
+
+    #convert mkv file to mp4
+    input_name = project_path+media_path+'converted.mp4'
+    cmd = ["ffmpeg","-i",project_path+media_path+filename,"-c:v","copy","-an","-y",input_name]
+    subprocess_call(cmd)
+    #input_name = project_path+media_path+filename
+
+    list.append(read)
+    name_list = []
+    begin = 0
+    for current in list:
+        t2 = current-begin
+        t1 = frames_to_second(begin, fps)
+        print('start time :', t1)
+        t2 = frames_to_second(t2, fps)
+        print('stop time :', t2)
+        tar=media_path+output_name+str(begin)+output_format
+        name_list.append(tar)
+        tar = project_path+tar
+        #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
+        #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
+        #cmd = ["ffmpeg", "-i", project_path+media_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
+        cmd = ["ffmpeg","-i",input_name,"-c:av","copy","-ss",str(t1),"-t",str(t2),"-y",tar]
+        subprocess_call(cmd)
+
+        begin = current
+
+    return name_list
+
+def convert_seconds_to_timeformat(a):
+    minute, second = divmod(a, 60)
+    hour, minute = divmod(minute, 60)
+    return str(hour)+str(minute)+str(second)
+
+def frames_to_timecode(frames, fps):
+    frame = int(frames)
+    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))
+
+def frames_to_second(frames, fps):
+    return truediv(frames, fps)
