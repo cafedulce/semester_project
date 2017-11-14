@@ -1,12 +1,12 @@
 <h1>result page</h1>
 
 <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
-<p>scene_list() = {{scene_manager.scene_list}}</p>
 
 <h2>parameters used</h2>
-<p>detection algorithm = {{scene_manager.detection_method}} , threshold = {{scene_manager.args.threshold}}, downscale factor = {{scene_manager.downscale_factor}}, frame skip = {{scene_manager.frame_skip}}</p>
+<p>detection algorithm = {{det}} , threshold = {{thres}}, downscale factor = {{down}}</p>
 
 <h3>splitted videos</h3>
+<ul>
 {% for video in list %}
     <li>
       <video width="320" height="240" controls>
@@ -15,3 +15,4 @@
       </video>
     </li>    
 {% endfor %}
+</ul>

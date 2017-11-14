@@ -36,27 +36,31 @@ def upload(request):
     if form.is_valid():
 
         video_file, scenedetect_object = form_cleaner(form, media_path, project_path)
-
         scene_detectors = scenedetect.detectors.get_available()
-
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
+        f_r_p = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
 
-        fps, read, processed = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
-
-        #output_file(sc_man, scenedetect_object.output_file ,fps, read)
         output_format = '.mp4'
-        output_name = 'cut'
+        output_name = 'shot'
+        list = ffmpeg_split(project_path,media_path, sc_man.scene_list, video_file.name, output_name, output_format, f_r_p[0], f_r_p[1])
 
-        """list = splitter(video_file.absolute_path, sc_man.scene_list,project_path,media_path+'cut', sc_man.frame_skip, read)"""
-        """number = split_input_video(video_file.absolute_path, media_path+'split', sc_man, fps)"""
-        list = ffmpeg_split(project_path,media_path, sc_man.scene_list, video_file.name, output_name, output_format, fps, read)
-
-        return render(request, 'interface/result.html',{'fps':fps,'read':read, 'processed':processed, 'scene_manager':sc_man, 'path':video_file.path, 'list':list})
+        request.session['fps_read_proc'] = f_r_p
+        request.session['det_thres_down'] = (sc_man.detection_method,sc_man.args.threshold,sc_man.downscale_factor)
+        request.session['video_list'] = list
+        
+        return redirect(result)
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
 
-def test(request):
+def result(request):
 
+    frp = request.session.get('fps_read_proc')
+    dtd = request.session.get('det_thres_down')
+    list = request.session.get('video_list')
+    return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'list':list})
+
+def test(request):
+    print(request.session.get('atest'))
     file = project_path+media_path+'goldeneye.mp4'
     return render(request, 'interface/test.html', {'file':file})
 
