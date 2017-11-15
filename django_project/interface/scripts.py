@@ -12,8 +12,9 @@ from moviepy.tools import subprocess_call
 from operator import truediv
 
 import scenedetect
+import re
 
-def split(capture, output_filename, first_frame, last_frame, fps, size):
+"""def split(capture, output_filename, first_frame, last_frame, fps, size):
 
     video_writer = cv2.VideoWriter(output_filename, cv2.VideoWriter_fourcc('H','2','6','4'), fps, size)
 
@@ -28,11 +29,6 @@ def split(capture, output_filename, first_frame, last_frame, fps, size):
         ret, im = capture.read()
         video_writer.write(im)
         number_of_frames -=1
-    """frame_number = capture.get(cv2.CAP_PROP_POS_FRAMES)
-    while frame_number < last_frame:
-        ret, frame = capture.read()
-        video_writer.write(frame)
-        frame_number = capture.get(cv2.CAP_PROP_POS_FRAMES)"""
 
     return 1
 
@@ -64,7 +60,7 @@ def splitter(filename, scene_list, project_path, output_prefix, frameskip, read)
         split(capture, project_path+name, begin_frame, frame-(2+frameskip), fps, size)
         begin_frame = frame
 
-    return name_list
+    return name_list"""
 
 def form_cleaner(form, media_path, project_path):
 
@@ -114,13 +110,12 @@ def output_file(smgr, file, video_fps, frames_read):
 
     file.close()
 
-def split_input_video(input_path, output_path, smgr, video_fps):
+"""def split_input_video(input_path, output_path, smgr, video_fps):
 
     scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
     scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
     timecode_list_str = ','.join(scene_list_tc)
-    """ Calls the mkvmerge command on the input video, splitting it at the
-    passed timecodes, where each scene is written in sequence from 001."""
+    
     #args.output.close()
     print('[PySceneDetect] Splitting video into clips...')
     ret_val = None
@@ -142,7 +137,7 @@ def split_input_video(input_path, output_path, smgr, video_fps):
         else:
             print('[PySceneDetect] Finished writing scenes to output.')
 
-    return number
+    return number"""
 
 def ffmpeg_split(project_path, media_path, list, filename, output_name, output_format, fps, read):
 
@@ -175,14 +170,14 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
 
     return media_name_list
 
-def convert_seconds_to_timeformat(a):
+"""def convert_seconds_to_timeformat(a):
     minute, second = divmod(a, 60)
     hour, minute = divmod(minute, 60)
-    return str(hour)+str(minute)+str(second)
+    return str(hour)+str(minute)+str(second)"""
 
-def frames_to_timecode(frames, fps):
+"""def frames_to_timecode(frames, fps):
     frame = int(frames)
-    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))
+    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))"""
 
 def frames_to_second(frames, fps):
     return truediv(frames, fps)
@@ -196,13 +191,18 @@ def combine(video_list, to_combine_list, project_path, media_path):
         else:
             a = project_path+to_combine_list[0]
             b = project_path+to_combine_list[1]
-            o = media_path+"temp.mp4"
+            #regex
+            num1 = re.search('shot([0-9]+)\.', a).group(1)
+            num2 = re.search('shot([0-9]+)\.', b).group(1)
+            o = media_path+"shot"+str(num1)+str(num2)+".mp4"
+
             arg = '[0:v:0] [1:v:0] concat=n=2:v=1 [v]'
             cmd = ["ffmpeg","-i",a,"-i",b,"-filter_complex",arg,"-map","[v]","-y",project_path+o]
             subprocess_call(cmd)
-            video_list.pop(indexa)
             video_list.pop(indexb)
+            video_list.pop(indexa)
             video_list.insert(indexa, o)
             to_combine_list.pop(0)
             to_combine_list.pop(0)
+            to_combine_list.insert(0, o)
     return video_list
