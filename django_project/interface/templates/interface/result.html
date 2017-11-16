@@ -1,3 +1,15 @@
+<!-- javascript scripts -->
+
+<script type="text/javascript">
+    function cut_shot(index){
+        document.getElementById("type_id").value = "cut";
+        document.getElementById("t_id").value = document.getElementById(index).currentTime;
+        document.getElementById("v_id").value = index;
+    }
+</script>
+
+<!-- html code -->
+
 <h1>result page</h1>
 
 <p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
@@ -5,21 +17,28 @@
 <h2>parameters used</h2>
 <p>detection algorithm = {{det}} , threshold = {{thres}}, downscale factor = {{down}}</p>
 
+<!------------------------------------------------------------------------------------->
+
 <h3>splitted videos</h3>
 <form method="post">
        {% csrf_token %}
-       <input type="submit" name="combine"/>
-    <ul>
-    {% for video in vlist %}
-        <li>
-          <p>{{video|slice:"19:"}}</p>
-          <video width="320" height="240" controls played>
-            <source src={{video}} type="video/mp4">
-            video not supported
-          </video>
-          <input type="checkbox" name="combine[]" value={{video}} />
-        </li>
-    {% endfor %}
-    </ul>
+       <input id="combine_id" type="submit" value="combine selected shots"/>
+        <ul>
+        {% for video in vlist %}
+            <li>
+              <p id="video_name_id">{{video|slice:"19:"}}</p>
 
+              <video id={{forloop.counter0}} width="320" height="240" controls>
+                <source src={{video}} type="video/mp4">
+              </video>
+
+              <input id="cut_button_id" type="submit" onclick="cut_shot({{forloop.counter0}})" value="cut shot"/>
+              <input type="checkbox" name="combine[]" value={{video}}/>
+
+            </li>
+        {% endfor %}
+        </ul>
+        <input id="t_id" name="t" type="hidden"/>
+        <input id="v_id" name="v" type="hidden"/>
+        <input id="type_id" name="type" type="hidden" value="combine"/>
 </form>

@@ -1,7 +1,47 @@
+<script>
+    function functionA(){
+        document.getElementById("test").innerHTML = "aight";
+    }
+</script>
+<script type="text/javascript">
+    function send(){
+        var URL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
+        var vid = document.getElementById("video");
+        var time = vid.currentTime;
+        var data = {'var': time};
+        $.post(URL, data, function(response){
+            if(response === 'success'){
+                alert('Yay!');
+            }
+            else{
+                alert('Error! :(');
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    function cut_time(){
+        document.getElementById("t").value = document.getElementById("video").currentTime;
+        document.getElementById("type").value = "cut";
+        document.getElementById("count").value = count
+    }
+</script>
+
 <h1>test</h1>
 
-<video width="320" height="240" controls>
-<<<<<<< HEAD
+
+<video id="video" width="320" height="240" controls>
     <source src={{file}} type="video/mp4">
         video not supported
-</video></a>
+</video>
+<script>var count = 4</script>
+<script>var ident = "t"</script>
+<form method="post">
+    {% csrf_token %}
+    <script>count = count+1</script>
+    <input id="combine" type="submit" name="combine" onclick="cut_time()"/>
+    <input id="unk" type="hidden" name="cut[]"/>
+    <script>document.getElementById("unk").id = ident;</script>
+    <input id="type" type="hidden" name="type"/>
+    <input id="count" type="hidden" name="count"/>
+</form>

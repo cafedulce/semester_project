@@ -61,6 +61,12 @@ def result(request):
     video_list = request.session.get('video_list')
 
     to_combine = request.POST.getlist('combine[]')
+    type = request.POST.get('type')
+    print(type)
+    vid = request.POST.getlist('v')
+    print(vid)
+    time = request.POST.getlist('t')
+    print(time)
     if to_combine:
         video_list = combine(video_list, to_combine, project_path, media_path)
         request.session['video_list'] = video_list
@@ -69,8 +75,24 @@ def result(request):
     return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list))})
 
 def test(request):
-    print(request.session.get('atest'))
-    file = project_path+media_path+'goldeneye.mp4'
+    file = media_path+'goldeneye.mp4'
+    time = 0
+    count = 0
+    """if request.method == 'POST':
+        print(request.POST)
+        if 'var' in request.POST:
+            time = request.POST['var']
+            return HttpResponse('success')
+        return HttpResponse('fail')"""
+    t = request.POST.getlist('cut[]')
+    c = request.POST.getlist('count')
+    if t:
+        time = t
+    if c:
+        count = c
+    print(time)
+    print(count)
+    print(request.POST)
     return render(request, 'interface/test.html', {'file':file})
 
 
