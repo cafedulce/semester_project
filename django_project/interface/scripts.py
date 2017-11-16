@@ -181,10 +181,10 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
 
 def frames_to_second(frames, fps):
     return truediv(frames, fps)
+def seconds_to_frame(sec, fps):
+    return int(sec*fps)
 
 def combine(video_list, to_combine_list, project_path, media_path):
-    print(video_list)
-    print(to_combine_list)
     while len(to_combine_list) >= 2:
         indexa = video_list.index(to_combine_list[0])
         indexb = video_list.index(to_combine_list[1])
@@ -207,4 +207,23 @@ def combine(video_list, to_combine_list, project_path, media_path):
             to_combine_list.pop(0)
             to_combine_list.pop(0)
             to_combine_list.insert(0, o)
+    return video_list
+
+def cut(video_list, vid, time, project_path, media_path, fps, output_name, output_format):
+    src = video_list[vid]
+    #regex
+    sec = float(re.search('[0-9]+\.([0-9]{1})', str(time)).group(0))
+    offset = int(re.search('shot([0-9]+)\.', src).group(1))
+
+    target1 = media_path+output_name+str(offset)+output_format
+    target2 = media_path+output_name+str(offset+seconds_to_frame(sec, fps))+output_format
+    cmd = ["ffmpeg", "-i", project_path + src, "-c:av", "copy", "-ss", str(sec), "-y", project_path + target2]
+    subprocess_call(cmd)
+    cmd = ["ffmpeg","-i",project_path+src,"-c:av","copy","-ss","0.0","-t",str(sec),"-y",project_path+target1]
+    subprocess_call(cmd)
+
+    video_list.pop(vid)
+    video_list.insert(vid, target2)
+    video_list.insert(vid, target1)
+
     return video_list

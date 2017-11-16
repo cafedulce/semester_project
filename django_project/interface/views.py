@@ -59,18 +59,24 @@ def result(request):
     frp = request.session.get('fps_read_proc')
     dtd = request.session.get('det_thres_down')
     video_list = request.session.get('video_list')
-    """type = request.POST.get('type')
-    print(type)
-    vid = request.POST.getlist('v')
-    print(vid)
-    time = request.POST.getlist('t')
-    print(time)"""
 
-    to_combine = request.POST.getlist('combine[]')
-    if to_combine:
-        video_list = combine(video_list, to_combine, project_path, media_path)
-        request.session['video_list'] = video_list
-        return redirect(result)
+    type = request.POST.get('type')
+    print(type)
+    if type == 'combine':
+        to_combine = request.POST.getlist('combine[]')
+        if to_combine:
+            video_list = combine(video_list, to_combine, project_path, media_path)
+            request.session['video_list'] = video_list
+            return redirect(result)
+    elif type == 'cut':
+        print("elif cut")
+        vid = int(request.POST.get('v'))
+        time = float(request.POST.get('t'))
+        print(vid, time)
+        if not time == 0:
+            video_list = cut(video_list, vid, time, project_path, media_path, frp[0], "split", ".mp4")
+            request.session['video_list'] = video_list
+            return redirect(result)
 
     return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list))})
 
