@@ -184,39 +184,42 @@ def frames_to_second(frames, fps):
 def seconds_to_frame(sec, fps):
     return int(sec*fps)
 
-def combine(video_list, to_combine_list, project_path, media_path):
+def combine(video_list, to_combine_list, project_path, media_path, output_name, output_format):
     while len(to_combine_list) >= 2:
-        indexa = video_list.index(to_combine_list[0])
-        indexb = video_list.index(to_combine_list[1])
-        if abs(indexa-indexb) > 1:
+        index1 = video_list.index(to_combine_list[0])
+        index2 = video_list.index(to_combine_list[1])
+        if abs(index1-index2) > 1:
             to_combine_list.pop(0)
         else:
             a = project_path+to_combine_list[0]
             b = project_path+to_combine_list[1]
             #regex
-            num1 = re.search('shot([0-9]+)\.', a).group(1)
-            num2 = re.search('shot([0-9]+)\.', b).group(1)
-            o = media_path+"shot"+str(num1)+str(num2)+".mp4"
+            reg = output_name+"(.+)\."
+            num1 = re.search(reg, a).group(1)
+            num2 = re.search(reg, b).group(1)
+            target = media_path+output_name+str(num1)+"-"+str(num2)+output_format
 
             arg = '[0:v:0] [1:v:0] concat=n=2:v=1 [v]'
-            cmd = ["ffmpeg","-i",a,"-i",b,"-filter_complex",arg,"-map","[v]","-y",project_path+o]
+            cmd = ["ffmpeg","-i",a,"-i",b,"-filter_complex",arg,"-map","[v]","-y",project_path+target]
             subprocess_call(cmd)
-            video_list.pop(indexb)
-            video_list.pop(indexa)
-            video_list.insert(indexa, o)
+            video_list.pop(index2)
+            video_list.pop(index1)
+            video_list.insert(index1, target)
             to_combine_list.pop(0)
             to_combine_list.pop(0)
-            to_combine_list.insert(0, o)
+            to_combine_list.insert(0, target)
     return video_list
 
 def cut(video_list, vid, time, project_path, media_path, fps, output_name, output_format):
     src = video_list[vid]
-    #regex
+    #regex time
     sec = float(re.search('[0-9]+\.([0-9]{1})', str(time)).group(0))
-    offset = int(re.search('shot([0-9]+)\.', src).group(1))
+    #regex name
+    reg = output_name+"(.+)\."
+    name = re.search(reg, src).group(1)
 
-    target1 = media_path+output_name+str(offset)+output_format
-    target2 = media_path+output_name+str(offset+seconds_to_frame(sec, fps))+output_format
+    target1 = media_path+output_name+name+"(1)"+output_format
+    target2 = media_path+output_name+name+"(2)"+output_format
     cmd = ["ffmpeg", "-i", project_path + src, "-c:av", "copy", "-ss", str(sec), "-y", project_path + target2]
     subprocess_call(cmd)
     cmd = ["ffmpeg","-i",project_path+src,"-c:av","copy","-ss","0.0","-t",str(sec),"-y",project_path+target1]

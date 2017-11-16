@@ -65,7 +65,7 @@ def result(request):
     if type == 'combine':
         to_combine = request.POST.getlist('combine[]')
         if to_combine:
-            video_list = combine(video_list, to_combine, project_path, media_path)
+            video_list = combine(video_list, to_combine, project_path, media_path, "shot", ".mp4")
             request.session['video_list'] = video_list
             return redirect(result)
     elif type == 'cut':
@@ -74,7 +74,7 @@ def result(request):
         time = float(request.POST.get('t'))
         print(vid, time)
         if not time == 0:
-            video_list = cut(video_list, vid, time, project_path, media_path, frp[0], "split", ".mp4")
+            video_list = cut(video_list, vid, time, project_path, media_path, frp[0], "shot", ".mp4")
             request.session['video_list'] = video_list
             return redirect(result)
 
