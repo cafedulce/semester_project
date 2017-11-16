@@ -8,8 +8,8 @@ class VideoForm(forms.Form):
     type = forms.ChoiceField(choices=TYPE_CHOICE, widget=forms.Select(), required=False)
     threshold = forms.IntegerField(required=False, initial=30 ,help_text='(default=30)')
 
-    stats_file = forms.BooleanField(required=False, initial=False)
-    output_file = forms.BooleanField(required=False, initial=False)
+    #stats_file = forms.BooleanField(required=False, initial=False)
+    #output_file = forms.BooleanField(required=False, initial=False)
     #save_images = forms.BooleanField(required=False, initial=False)
     #quiet_mode = forms.BooleanField(required=False, initial=False)
 

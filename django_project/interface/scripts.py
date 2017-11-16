@@ -81,13 +81,11 @@ def form_cleaner(form, media_path, project_path):
     if form.cleaned_data["downscale"]:
         scenedetect_object.downscale_factor = form.cleaned_data["downscale"]
 
-    if form.cleaned_data["stats_file"]:
-        stat = open('stats_file', 'w')
-        scenedetect_object.stats_file = stat
+    stat = open('stats_file', 'w')
+    scenedetect_object.stats_file = stat
 
-    if form.cleaned_data["output_file"]:
-        out = open('scenes', 'w')
-        scenedetect_object.output_file = out
+    out = open('scenes', 'w')
+    scenedetect_object.output_file = out
 
     return video_file, scenedetect_object
 

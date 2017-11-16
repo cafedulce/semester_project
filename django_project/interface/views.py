@@ -41,6 +41,7 @@ def upload(request):
         scene_detectors = scenedetect.detectors.get_available()
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
         f_r_p = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
+        output_file(sc_man, scenedetect_object.output_file, f_r_p[0], f_r_p[1])
 
         output_format = '.mp4'
         output_name = 'shot'
