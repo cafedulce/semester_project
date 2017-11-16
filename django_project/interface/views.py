@@ -59,14 +59,14 @@ def result(request):
     frp = request.session.get('fps_read_proc')
     dtd = request.session.get('det_thres_down')
     video_list = request.session.get('video_list')
-
-    to_combine = request.POST.getlist('combine[]')
-    type = request.POST.get('type')
+    """type = request.POST.get('type')
     print(type)
     vid = request.POST.getlist('v')
     print(vid)
     time = request.POST.getlist('t')
-    print(time)
+    print(time)"""
+
+    to_combine = request.POST.getlist('combine[]')
     if to_combine:
         video_list = combine(video_list, to_combine, project_path, media_path)
         request.session['video_list'] = video_list

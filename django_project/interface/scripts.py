@@ -183,6 +183,8 @@ def frames_to_second(frames, fps):
     return truediv(frames, fps)
 
 def combine(video_list, to_combine_list, project_path, media_path):
+    print(video_list)
+    print(to_combine_list)
     while len(to_combine_list) >= 2:
         indexa = video_list.index(to_combine_list[0])
         indexb = video_list.index(to_combine_list[1])
