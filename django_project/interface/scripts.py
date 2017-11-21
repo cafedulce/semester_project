@@ -92,22 +92,39 @@ def form_cleaner(form, media_path, project_path):
 
 
 ### code from PySceneDetect
-def output_file(smgr, file, video_fps, frames_read):
+def output_file(scene_list, file, video_fps, frames_read):
 
-    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
     scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
     # Create new lists with scene cuts in seconds, and the length of each scene.
-    scene_start_sec = [(1.0 * x) / float(video_fps) for x in smgr.scene_list]
+    scene_start_sec = [(1.0 * x) / float(video_fps) for x in scene_list]
     scene_len_sec = []
-    if len(smgr.scene_list) > 0:
-        scene_len_sec = smgr.scene_list + [frames_read]
+    if len(scene_list) > 0:
+        scene_len_sec = scene_list + [frames_read]
         scene_len_sec = [(1.0 * x) / float(video_fps) for x in scene_len_sec]
         scene_len_sec = [(y - x) for x, y in zip(scene_len_sec[:-1], scene_len_sec[1:])]
 
-    scenedetect.output_scene_list(file, smgr, scene_list_tc,
+    output_scene_list(file, scene_list, scene_list_tc,
                       scene_start_sec, scene_len_sec)
 
     file.close()
+
+def output_scene_list(csv_file, scene_list, scene_list_tc, scene_start_sec,
+                      scene_len_sec):
+    ''' Outputs the list of scenes in human-readable format to a CSV file
+        for further analysis. '''
+    # Output timecodes to CSV file if required (and scenes were found).
+    #if args.output and len(scene_list) > 0:
+    if csv_file and len(scene_list) > 0:
+        csv_writer = csv.writer(csv_file) #args.output)
+        # Output timecode scene list
+        csv_writer.writerow(scene_list_tc)
+        # Output detailed, human-readable scene list.
+        csv_writer.writerow(["Scene Number", "Frame Number (Start)",
+                             "Timecode", "Start Time (seconds)", "Length (seconds)"])
+        for i, _ in enumerate(scene_list):
+            csv_writer.writerow([str(i+1), str(scene_list[i]),scene_list_tc[i], str(scene_start_sec[i]),str(scene_len_sec[i])])
+
 
 """def split_input_video(input_path, output_path, smgr, video_fps):
 
@@ -146,6 +163,8 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
     subprocess_call(cmd)
     #input_name = project_path+media_path+filename
 
+    # discard first scene(0) and add last read for computing purpose/ at the end add/remove these elements
+    list.pop(0)
     list.append(read)
     media_name_list = []
 
@@ -164,6 +183,8 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
         subprocess_call(cmd)
 
         begin = current
+    list.pop(-1)
+    list.insert(0,0)
 
     return media_name_list
 
@@ -181,7 +202,7 @@ def frames_to_second(frames, fps):
 def seconds_to_frame(sec, fps):
     return int(sec*fps)
 
-def combine(video_list, to_combine_list, project_path, media_path, output_name, output_format):
+def combine(scene_list, video_list, to_combine_list, project_path, media_path, output_name, output_format, fps, read):
     while len(to_combine_list) >= 2:
         index1 = video_list.index(to_combine_list[0])
         index2 = video_list.index(to_combine_list[1])
@@ -205,12 +226,20 @@ def combine(video_list, to_combine_list, project_path, media_path, output_name, 
             to_combine_list.pop(0)
             to_combine_list.pop(0)
             to_combine_list.insert(0, target)
+
+            #updating scene_list
+            scene_list.pop(index2)
+            update_scenes(scene_list, fps, read)
+
     return video_list
 
-def cut(video_list, vid, time, project_path, media_path, fps, output_name, output_format):
+def cut(scene_list, video_list, vid, time, project_path, media_path, output_name, output_format, fps, read):
     src = video_list[vid]
+
     #regex time
     sec = float(re.search('[0-9]+\.([0-9]{1})', str(time)).group(0))
+    frame = seconds_to_frame(sec, fps)
+
     #regex name
     reg = output_name+"(.+)\."
     name = re.search(reg, src).group(1)
@@ -226,5 +255,13 @@ def cut(video_list, vid, time, project_path, media_path, fps, output_name, outpu
     video_list.insert(vid, target2)
     video_list.insert(vid, target1)
 
+    #udating scene_list
+    scene_list.insert(vid+1, frame)
+    update_scenes(scene_list, fps, read)
+    
     return video_list
+
+def update_scenes(scene_list, fps, read):
+    with open(doc_path+scenes_name, 'w') as file:
+        output_file(scene_list, file, fps, read)
 

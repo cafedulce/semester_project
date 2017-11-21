@@ -38,13 +38,17 @@ def upload(request):
         scene_detectors = scenedetect.detectors.get_available()
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
         f_r_p = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
-        output_file(sc_man, scenedetect_object.output_file, f_r_p[0], f_r_p[1])
+        #adding the frist frame (not taken in account in pySceneDetect)
+        sc_man.scene_list.insert(0, 0)
+
+        output_file(sc_man.scene_list, scenedetect_object.output_file, f_r_p[0], f_r_p[1])
 
         video_list = ffmpeg_split(project_path,video_path, sc_man.scene_list, video_file.name, video_target_name, video_target_format, f_r_p[0], f_r_p[1])
 
         request.session['fps_read_proc'] = f_r_p
         request.session['det_thres_down'] = (sc_man.detection_method,sc_man.args.threshold,sc_man.downscale_factor)
         request.session['video_list'] = video_list
+        request.session['scene_list'] = sc_man.scene_list
 
         return redirect(result)
 
@@ -55,19 +59,21 @@ def result(request):
     frp = request.session.get('fps_read_proc')
     dtd = request.session.get('det_thres_down')
     video_list = request.session.get('video_list')
+    scene_list = request.session.get('scene_list')
+    print(scene_list)
 
     type = request.POST.get('type')
     if type == 'combine':
         to_combine = request.POST.getlist('combine[]')
         if to_combine:
-            video_list = combine(video_list, to_combine, project_path, video_path, video_target_name, video_target_format)
+            video_list = combine(scene_list, video_list, to_combine, project_path, video_path, video_target_name, video_target_format,frp[0],frp[1])
             request.session['video_list'] = video_list
             return redirect(result)
     elif type == 'cut':
         vid = int(request.POST.get('v'))
         time = float(request.POST.get('t'))
         if not time == 0:
-            video_list = cut(video_list, vid, time, project_path, video_path, frp[0], video_target_name, video_target_format)
+            video_list = cut(scene_list, video_list, vid, time, project_path, video_path, video_target_name, video_target_format,frp[0],frp[1])
             request.session['video_list'] = video_list
             return redirect(result)
 
