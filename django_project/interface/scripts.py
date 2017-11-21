@@ -3,6 +3,7 @@ import csv
 from interface.models import VideoFile
 from interface.models import PySceneDetectArgs
 from interface.forms import VideoForm
+from interface.constants import *
 
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import os
@@ -81,10 +82,10 @@ def form_cleaner(form, media_path, project_path):
     if form.cleaned_data["downscale"]:
         scenedetect_object.downscale_factor = form.cleaned_data["downscale"]
 
-    stat = open('stats_file', 'w')
+    stat = open(doc_path+statfile_name, 'w')
     scenedetect_object.stats_file = stat
 
-    out = open('scenes', 'w')
+    out = open(doc_path+scenes_name, 'w')
     scenedetect_object.output_file = out
 
     return video_file, scenedetect_object
@@ -140,7 +141,7 @@ def output_file(smgr, file, video_fps, frames_read):
 def ffmpeg_split(project_path, media_path, list, filename, output_name, output_format, fps, read):
 
     #convert mkv file to mp4
-    input_name = project_path+media_path+'converted.mp4'
+    input_name = project_path+media_path+video_target_temp+video_target_format
     cmd = ["ffmpeg","-i",project_path+media_path+filename,"-c:v","copy","-an","-y",input_name]
     subprocess_call(cmd)
     #input_name = project_path+media_path+filename
@@ -152,9 +153,7 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
     for current in list:
         t2 = current-begin
         t1 = frames_to_second(begin, fps)
-        print('start time :', t1)
         t2 = frames_to_second(t2, fps)
-        print('stop time :', t2)
         tar=media_path+output_name+str(begin)+output_format
         media_name_list.append(tar)
         tar = project_path+tar
@@ -228,3 +227,4 @@ def cut(video_list, vid, time, project_path, media_path, fps, output_name, outpu
     video_list.insert(vid, target1)
 
     return video_list
+

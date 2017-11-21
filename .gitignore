@@ -9,3 +9,4 @@
 *.odt
 import_scene.py
 django_project/interface/migrations/
+django_project/media/
