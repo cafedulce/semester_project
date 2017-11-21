@@ -63,12 +63,12 @@ def splitter(filename, scene_list, project_path, output_prefix, frameskip, read)
 
     return name_list"""
 
-def form_cleaner(form, media_path, project_path):
+def form_cleaner(form):
 
     video_file = VideoFile()
     video_file.video = form.cleaned_data["video"]
     video_file.name = video_file.video_name()
-    video_file.path = media_path + video_file.name
+    video_file.path = video_path + video_file.name
     video_file.absolute_path = project_path + video_file.path
     # video_file.absolute_path = video_file.video.path
     video_file.save()
@@ -155,13 +155,13 @@ def output_scene_list(csv_file, scene_list, scene_list_tc, scene_start_sec,
 
     return number"""
 
-def ffmpeg_split(project_path, media_path, list, filename, output_name, output_format, fps, read):
+def ffmpeg_split(list, filename, fps, read):
 
     #convert mkv file to mp4
-    input_name = project_path+media_path+video_target_temp+video_target_format
-    cmd = ["ffmpeg","-i",project_path+media_path+filename,"-c:v","copy","-an","-y",input_name]
+    input_name = project_path+video_path+video_target_temp+video_target_format
+    cmd = ["ffmpeg","-i",project_path+video_path+filename,"-c:v","copy","-an","-y",input_name]
     subprocess_call(cmd)
-    #input_name = project_path+media_path+filename
+    #input_name = project_path+video_path+filename
 
     # discard first scene(0) and add last read for computing purpose/ at the end add/remove these elements
     list.pop(0)
@@ -173,12 +173,12 @@ def ffmpeg_split(project_path, media_path, list, filename, output_name, output_f
         t2 = current-begin
         t1 = frames_to_second(begin, fps)
         t2 = frames_to_second(t2, fps)
-        tar=media_path+output_name+str(begin)+output_format
+        tar= video_path+video_target_name+str(begin)+video_target_format
         media_name_list.append(tar)
         tar = project_path+tar
         #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
-        #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+media_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
-        #cmd = ["ffmpeg", "-i", project_path+media_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
+        #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+video_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
+        #cmd = ["ffmpeg", "-i", project_path+video_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
         cmd = ["ffmpeg","-i",input_name,"-c:av","copy","-ss",str(t1),"-t",str(t2),"-y",tar]
         subprocess_call(cmd)
 
@@ -202,7 +202,7 @@ def frames_to_second(frames, fps):
 def seconds_to_frame(sec, fps):
     return int(sec*fps)
 
-def combine(scene_list, video_list, to_combine_list, project_path, media_path, output_name, output_format, fps, read):
+def combine(scene_list, video_list, to_combine_list, fps, read):
     while len(to_combine_list) >= 2:
         index1 = video_list.index(to_combine_list[0])
         index2 = video_list.index(to_combine_list[1])
@@ -212,10 +212,10 @@ def combine(scene_list, video_list, to_combine_list, project_path, media_path, o
             a = project_path+to_combine_list[0]
             b = project_path+to_combine_list[1]
             #regex
-            reg = output_name+"(.+)\."
+            reg = video_target_name+"(.+)\."
             num1 = re.search(reg, a).group(1)
             num2 = re.search(reg, b).group(1)
-            target = media_path+output_name+str(num1)+"-"+str(num2)+output_format
+            target = video_path+video_target_name+str(num1)+"-"+str(num2)+video_target_format
 
             arg = '[0:v:0] [1:v:0] concat=n=2:v=1 [v]'
             cmd = ["ffmpeg","-i",a,"-i",b,"-filter_complex",arg,"-map","[v]","-y",project_path+target]
@@ -233,7 +233,7 @@ def combine(scene_list, video_list, to_combine_list, project_path, media_path, o
 
     return video_list
 
-def cut(scene_list, video_list, vid, time, project_path, media_path, output_name, output_format, fps, read):
+def cut(scene_list, video_list, vid, time, fps, read):
     src = video_list[vid]
 
     #regex time
@@ -241,11 +241,11 @@ def cut(scene_list, video_list, vid, time, project_path, media_path, output_name
     frame = seconds_to_frame(sec, fps)
 
     #regex name
-    reg = output_name+"(.+)\."
+    reg = video_target_name+"(.+)\."
     name = re.search(reg, src).group(1)
 
-    target1 = media_path+output_name+name+"(1)"+output_format
-    target2 = media_path+output_name+name+"(2)"+output_format
+    target1 = video_path+video_target_name+name+"(1)"+video_target_format
+    target2 = video_path+video_target_name+name+"(2)"+video_target_format
     cmd = ["ffmpeg", "-i", project_path + src, "-c:av", "copy", "-ss", str(sec), "-y", project_path + target2]
     subprocess_call(cmd)
     cmd = ["ffmpeg","-i",project_path+src,"-c:av","copy","-ss","0.0","-t",str(sec),"-y",project_path+target1]
@@ -265,3 +265,6 @@ def update_scenes(scene_list, fps, read):
     with open(doc_path+scenes_name, 'w') as file:
         output_file(scene_list, file, fps, read)
 
+def statfile_cut(scene_list, vid, time, fps):
+    time = 0
+    return time

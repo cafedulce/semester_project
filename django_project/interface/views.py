@@ -34,7 +34,7 @@ def upload(request):
 
     if form.is_valid():
 
-        video_file, scenedetect_object = form_cleaner(form, video_path, project_path)
+        video_file, scenedetect_object = form_cleaner(form)
         scene_detectors = scenedetect.detectors.get_available()
         sc_man = scenedetect.manager.SceneManager(scenedetect_object, scene_detectors)
         f_r_p = scenedetect.detect_scenes_file(path=video_file.absolute_path, scene_manager=sc_man)
@@ -43,7 +43,7 @@ def upload(request):
 
         output_file(sc_man.scene_list, scenedetect_object.output_file, f_r_p[0], f_r_p[1])
 
-        video_list = ffmpeg_split(project_path,video_path, sc_man.scene_list, video_file.name, video_target_name, video_target_format, f_r_p[0], f_r_p[1])
+        video_list = ffmpeg_split(sc_man.scene_list, video_file.name, f_r_p[0], f_r_p[1])
 
         request.session['fps_read_proc'] = f_r_p
         request.session['det_thres_down'] = (sc_man.detection_method,sc_man.args.threshold,sc_man.downscale_factor)
@@ -66,14 +66,14 @@ def result(request):
     if type == 'combine':
         to_combine = request.POST.getlist('combine[]')
         if to_combine:
-            video_list = combine(scene_list, video_list, to_combine, project_path, video_path, video_target_name, video_target_format,frp[0],frp[1])
+            video_list = combine(scene_list, video_list, to_combine,frp[0],frp[1])
             request.session['video_list'] = video_list
             return redirect(result)
     elif type == 'cut':
         vid = int(request.POST.get('v'))
         time = float(request.POST.get('t'))
         if not time == 0:
-            video_list = cut(scene_list, video_list, vid, time, project_path, video_path, video_target_name, video_target_format,frp[0],frp[1])
+            video_list = cut(scene_list, video_list, vid, time,frp[0],frp[1])
             request.session['video_list'] = video_list
             return redirect(result)
 
