@@ -14,6 +14,7 @@ from operator import truediv
 
 import scenedetect
 import re
+import csv
 
 """def split(capture, output_filename, first_frame, last_frame, fps, size):
 
@@ -235,10 +236,16 @@ def combine(scene_list, video_list, to_combine_list, fps, read):
 
 def cut(scene_list, video_list, vid, time, fps, read):
     src = video_list[vid]
-
-    #regex time
+    # regex time
     sec = float(re.search('[0-9]+\.([0-9]{1})', str(time)).group(0))
-    frame = seconds_to_frame(sec, fps)
+
+    #choosing best frame to cut
+    cut_time = statfile_cut(scene_list, vid, sec, fps, read)
+
+    #calulating absolute frame for updating scene list
+    frame_in_shot = seconds_to_frame(sec, fps)
+    frame_offset = scene_list[vid]
+    frame = frame_offset+frame_in_shot
 
     #regex name
     reg = video_target_name+"(.+)\."
@@ -246,9 +253,9 @@ def cut(scene_list, video_list, vid, time, fps, read):
 
     target1 = video_path+video_target_name+name+"(1)"+video_target_format
     target2 = video_path+video_target_name+name+"(2)"+video_target_format
-    cmd = ["ffmpeg", "-i", project_path + src, "-c:av", "copy", "-ss", str(sec), "-y", project_path + target2]
+    cmd = ["ffmpeg", "-i", project_path + src, "-c:av", "copy", "-ss", str(cut_time),"-y", project_path + target2]
     subprocess_call(cmd)
-    cmd = ["ffmpeg","-i",project_path+src,"-c:av","copy","-ss","0.0","-t",str(sec),"-y",project_path+target1]
+    cmd = ["ffmpeg","-i",project_path+src,"-c:av","copy","-ss","0.0","-t",str(cut_time),"-y",project_path+target1]
     subprocess_call(cmd)
 
     video_list.pop(vid)
@@ -265,6 +272,32 @@ def update_scenes(scene_list, fps, read):
     with open(doc_path+scenes_name, 'w') as file:
         output_file(scene_list, file, fps, read)
 
-def statfile_cut(scene_list, vid, time, fps):
-    time = 0
-    return time
+def statfile_cut(scene_list, vid, time, fps, read):
+
+    shot_begin = scene_list[vid]
+    shot_end = read if (len(scene_list)<=vid+1) else scene_list[vid+1]
+    print("shot end", shot_end)
+    frame_in_shot = seconds_to_frame(time, fps)
+    frame = shot_begin+frame_in_shot
+
+    #checking for shot overflow
+    offset = 0
+    if abs(frame_in_shot-shot_begin) <= cut_range:
+        offset = cut_range - abs(frame_in_shot-shot_begin)
+    if abs(frame_in_shot-shot_end) <= cut_range:
+        offset = abs(frame_in_shot-shot_end) - cut_range
+
+    #csv maniulation
+    with open(doc_path+statfile_name, 'r') as file:
+        stat = csv.reader(file)
+        stat = list(stat)
+        hsv_list = []
+        for i in range(2*cut_range):
+            #getting hsv values in statfile
+            hsv_list.append(float(stat[frame-cut_range+i+offset][4]))
+
+        cut_frame = frame_in_shot+(hsv_list.index(max(hsv_list))-cut_range)
+        cut_time = frames_to_second(cut_frame, fps)
+
+        file.close()
+        return cut_time

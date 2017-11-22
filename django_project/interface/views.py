@@ -60,7 +60,6 @@ def result(request):
     dtd = request.session.get('det_thres_down')
     video_list = request.session.get('video_list')
     scene_list = request.session.get('scene_list')
-    print(scene_list)
 
     type = request.POST.get('type')
     if type == 'combine':
@@ -83,12 +82,7 @@ def test(request):
     file = video_path+'goldeneye.mp4'
     time = 0
     count = 0
-    """if request.method == 'POST':
-        print(request.POST)
-        if 'var' in request.POST:
-            time = request.POST['var']
-            return HttpResponse('success')
-        return HttpResponse('fail')"""
+    
     t = request.POST.getlist('cut[]')
     c = request.POST.getlist('count')
     if t:
@@ -105,5 +99,4 @@ def download(request):
     path_to_file = project_path+'/stats_file'
     f = open(path_to_file, 'r')
     response = HttpResponse(f, content_type='application/csv')
-    """response['Content-Disposition'] = 'attachment; filename=filename'"""
     return response

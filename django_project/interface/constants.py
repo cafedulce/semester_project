@@ -10,3 +10,5 @@ video_target_temp = 'converted'
 
 statfile_name = 'statfile'
 scenes_name = 'scenes'
+
+cut_range = 20
