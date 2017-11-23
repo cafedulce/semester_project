@@ -16,54 +16,6 @@ import scenedetect
 import re
 import csv
 
-"""def split(capture, output_filename, first_frame, last_frame, fps, size):
-
-    video_writer = cv2.VideoWriter(output_filename, cv2.VideoWriter_fourcc('H','2','6','4'), fps, size)
-
-    if not video_writer.isOpened():
-        print('FATAL ERROR - could not open video writer')
-
-    capture.set(cv2.CAP_PROP_POS_FRAMES, first_frame)
-
-    number_of_frames = last_frame-first_frame+1
-
-    while number_of_frames >= 0:
-        ret, im = capture.read()
-        video_writer.write(im)
-        number_of_frames -=1
-
-    return 1
-
-def splitter(filename, scene_list, project_path, output_prefix, frameskip, read):
-
-    name_list = []
-
-    capture = cv2.VideoCapture(filename)
-
-    if not capture.isOpened():
-        print('FATAL ERROR - could not open video')
-        return -1
-
-    fps = capture.get(cv2.CAP_PROP_FPS)
-    ret, image = capture.read()
-    if not ret:
-        print('capure.read() didnt work')
-        return -1
-    h, w, c = image.shape
-    size = (w,h)
-    print scene_list
-    scene_list.append(read)
-    print scene_list
-
-    begin_frame = 0
-    for frame in scene_list:
-        name = output_prefix+str(begin_frame)+'.mp4'
-        name_list.append(name)
-        split(capture, project_path+name, begin_frame, frame-(2+frameskip), fps, size)
-        begin_frame = frame
-
-    return name_list"""
-
 def form_cleaner(form):
 
     video_file = VideoFile()
@@ -127,35 +79,6 @@ def output_scene_list(csv_file, scene_list, scene_list_tc, scene_start_sec,
             csv_writer.writerow([str(i+1), str(scene_list[i]),scene_list_tc[i], str(scene_start_sec[i]),str(scene_len_sec[i])])
 
 
-"""def split_input_video(input_path, output_path, smgr, video_fps):
-
-    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
-    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
-    timecode_list_str = ','.join(scene_list_tc)
-    
-    #args.output.close()
-    print('[PySceneDetect] Splitting video into clips...')
-    ret_val = None
-    number=0
-    try:
-        ret_val = subprocess.call(
-            ['mkvmerge',
-             '-o', output_path,
-             '--split', 'timecodes:%s' % timecode_list_str,
-             input_path])
-        number+=1
-    except FileNotFoundError:
-        print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
-              ' Please install mkvmerge to enable video output support.')
-    if ret_val is not None:
-        if ret_val != 0:
-            print('[PySceneDetect] Error splitting video '
-                  '(mkvmerge returned %d).' % ret_val)
-        else:
-            print('[PySceneDetect] Finished writing scenes to output.')
-
-    return number"""
-
 def ffmpeg_split(list, filename, fps, read):
 
     #convert mkv file to mp4
@@ -188,15 +111,6 @@ def ffmpeg_split(list, filename, fps, read):
     list.insert(0,0)
 
     return media_name_list
-
-"""def convert_seconds_to_timeformat(a):
-    minute, second = divmod(a, 60)
-    hour, minute = divmod(minute, 60)
-    return str(hour)+str(minute)+str(second)"""
-
-"""def frames_to_timecode(frames, fps):
-    frame = int(frames)
-    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))"""
 
 def frames_to_second(frames, fps):
     return truediv(frames, fps)
@@ -243,7 +157,7 @@ def cut(scene_list, video_list, vid, time, fps, read):
     cut_time = statfile_cut(scene_list, vid, sec, fps, read)
 
     #calulating absolute frame for updating scene list
-    frame_in_shot = seconds_to_frame(sec, fps)
+    frame_in_shot = seconds_to_frame(cut_time, fps)
     frame_offset = scene_list[vid]
     frame = frame_offset+frame_in_shot
 
@@ -301,3 +215,90 @@ def statfile_cut(scene_list, vid, time, fps, read):
 
         file.close()
         return cut_time
+
+
+"""def split(capture, output_filename, first_frame, last_frame, fps, size):
+
+    video_writer = cv2.VideoWriter(output_filename, cv2.VideoWriter_fourcc('H','2','6','4'), fps, size)
+
+    if not video_writer.isOpened():
+        print('FATAL ERROR - could not open video writer')
+
+    capture.set(cv2.CAP_PROP_POS_FRAMES, first_frame)
+
+    number_of_frames = last_frame-first_frame+1
+
+    while number_of_frames >= 0:
+        ret, im = capture.read()
+        video_writer.write(im)
+        number_of_frames -=1
+
+    return 1
+
+def splitter(filename, scene_list, project_path, output_prefix, frameskip, read):
+
+    name_list = []
+
+    capture = cv2.VideoCapture(filename)
+
+    if not capture.isOpened():
+        print('FATAL ERROR - could not open video')
+        return -1
+
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    ret, image = capture.read()
+    if not ret:
+        print('capure.read() didnt work')
+        return -1
+    h, w, c = image.shape
+    size = (w,h)
+    print scene_list
+    scene_list.append(read)
+    print scene_list
+
+    begin_frame = 0
+    for frame in scene_list:
+        name = output_prefix+str(begin_frame)+'.mp4'
+        name_list.append(name)
+        split(capture, project_path+name, begin_frame, frame-(2+frameskip), fps, size)
+        begin_frame = frame
+
+    return name_list"""
+
+"""def split_input_video(input_path, output_path, smgr, video_fps):
+
+    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
+    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
+    timecode_list_str = ','.join(scene_list_tc)
+
+    #args.output.close()
+    print('[PySceneDetect] Splitting video into clips...')
+    ret_val = None
+    number=0
+    try:
+        ret_val = subprocess.call(
+            ['mkvmerge',
+             '-o', output_path,
+             '--split', 'timecodes:%s' % timecode_list_str,
+             input_path])
+        number+=1
+    except FileNotFoundError:
+        print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
+              ' Please install mkvmerge to enable video output support.')
+    if ret_val is not None:
+        if ret_val != 0:
+            print('[PySceneDetect] Error splitting video '
+                  '(mkvmerge returned %d).' % ret_val)
+        else:
+            print('[PySceneDetect] Finished writing scenes to output.')
+
+    return number"""
+
+"""def convert_seconds_to_timeformat(a):
+    minute, second = divmod(a, 60)
+    hour, minute = divmod(minute, 60)
+    return str(hour)+str(minute)+str(second)"""
+
+"""def frames_to_timecode(frames, fps):
+    frame = int(frames)
+    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))"""
