@@ -216,6 +216,8 @@ def statfile_cut(scene_list, vid, time, fps, read):
         file.close()
         return cut_time
 
+def automatic_threshold():
+    pass
 
 """def split(capture, output_filename, first_frame, last_frame, fps, size):
 

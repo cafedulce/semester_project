@@ -23,6 +23,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
+    url(r'^$', views.upload),
     url(r'^admin/', admin.site.urls),
     url(r'^interface/', include('interface.urls')),
     ]

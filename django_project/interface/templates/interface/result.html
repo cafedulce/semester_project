@@ -1,5 +1,7 @@
 <!-- javascript scripts -->
 
+<!-- assigns a value "cut" to type_id variable, get the time of the video selected by index, and get the index-->
+<!-- this script is used whenever the user clicks on cur button-->
 <script type="text/javascript">
     function cut_shot(index){
         document.getElementById("type_id").value = "cut";
@@ -7,38 +9,79 @@
         document.getElementById("v_id").value = index;
     }
 </script>
+<!-- -->
+<script type="text/javascript">
+    function change_view(){
+        x = document.getElementById("view_id").value;
+        if (x == "display"){
+            document.getElementById("view_id").value  = "work";
+        }
+        else{
+            document.getElementById("view_id").value  = "display";
+        }
+    }
+</script>
 
 <!-- html code -->
-
 <h1>result page</h1>
-
-<p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
-
-<h2>parameters used</h2>
+<!-- display the result of the cutting shots process-->
+<h3>parameters</h3>
 <p>detection algorithm = {{det}} , threshold = {{thres}}, downscale factor = {{down}}</p>
-<a href="/media/docs/scenes">click here to download scene list</a>
+<p>fps = {{fps}}, frames read = {{read}}, frames processed = {{processed}}</p>
+<!-- link to download the scene list file-->
+<a href="/media/docs/scenes">click here to download scene list </a>
+
+<form method="post">
+    {% csrf_token %}
+    <!-- view_id variable used to display either the normal view or work view-->
+    <input id="view_id" name="new_view" type="hidden" value={{view}} />
+    <!-- click on it to change view between all scenes and cut/combine window-->
+    <input id="change_id" type="submit" onclick="change_view()" value={{view}} />
+</form>
 <!------------------------------------------------------------------------------------->
 
-<h3>splitted videos</h3>
-<form method="post">
-       {% csrf_token %}
-       <input id="combine_id" type="submit" value="combine selected shots"/>
-        <ul>
-        {% for video in vlist %}
-            <li>
-              <p id="video_name_id">{{video|slice:"19:"}}</p>
+<!-- cut/combine display and normal display-->
+<h1>splitted videos</h1>
+{% if view == "work" %}
+    <!-- the scenes are displayed in a formular type-->
+    <form method="post">
+           {% csrf_token %}
+            <!-- button used to combine 2 or more shots-->
+           <input id="combine_id" type="submit" value="combine selected shots"/>
 
-              <video id={{forloop.counter0}} width="320" height="240" controls>
-                <source src={{video}} type="video/mp4">
-              </video>
+            <!-- begin of the shot list-->
+            <ul>
+            {% for video in vlist %}
+                <li>
+                  <!-- the actual name of the shot sliced so to get rid of the path-->
+                  <p id="video_name_id">{{video|slice:"19:"}}</p>
+                  <!--  forloop.counter0 is a given counter in django starting at index 0 ... -->
+                  <!-- the id for each video is the counter, source is video in vlist-->
+                  <video id={{forloop.counter0}} width="320" height="240" controls>
+                    <source src={{video}} type="video/mp4">
+                  </video>
+                  <!--cut button and combine box for each video
+                        when user clicks on "cut shot", the javascript function cut_shot is called, with the index of the vid as argument-->
+                  <input id="cut_button_id" type="submit" onclick="cut_shot({{forloop.counter0}})" value="cut shot"/>
+                  <input type="checkbox" name="combine[]" value="{{video}}"/>
 
-              <input id="cut_button_id" type="submit" onclick="cut_shot({{forloop.counter0}})" value="cut shot"/>
-              <input type="checkbox" name="combine[]" value="{{video}}"/>
+                </li>
+            {% endfor %}
+            </ul>
 
-            </li>
-        {% endfor %}
-        </ul>
-        <input id="t_id" name="t" type="hidden"/>
-        <input id="v_id" name="v" type="hidden"/>
-        <input id="type_id" name="type" type="hidden" value="combine"/>
-</form>
+            <!-- 3 hidden variables used to pass infos to the server
+                t_id = time and v_id = index of video,  have no initial values, they are assigned when the function cut_shot is called
+                type_id variable is initialized with "combine" value, i.e. it is only changed when we expressely clik on cut_shot-->
+            <input id="t_id" name="t" type="hidden"/>
+            <input id="v_id" name="v" type="hidden"/>
+            <!-- the name="type" is used in the view to decide if cut or combine-->
+            <input id="type_id" name="type" type="hidden" value="combine"/>
+    </form>
+
+{% elif view == "display" %}
+    {% for video in vlist %}
+        <video id={{forloop.counter0}} width="240" height="160" controls>
+            <source src={{video}} type="video/mp4">
+        </video>
+    {% endfor %}
+{% endif %}

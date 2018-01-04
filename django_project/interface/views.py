@@ -15,6 +15,9 @@ from interface.scripts import *
 import scenedetect
 import csv
 
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+
 # Create your views here.
 
 def home(request):
@@ -45,10 +48,12 @@ def upload(request):
 
         video_list = ffmpeg_split(sc_man.scene_list, video_file.name, f_r_p[0], f_r_p[1])
 
+        #save in the session the important variables we will need in result view, so we can use them
         request.session['fps_read_proc'] = f_r_p
         request.session['det_thres_down'] = (sc_man.detection_method,sc_man.args.threshold,sc_man.downscale_factor)
         request.session['video_list'] = video_list
         request.session['scene_list'] = sc_man.scene_list
+        request.session['view'] = "display"
 
         return redirect(result)
 
@@ -56,11 +61,14 @@ def upload(request):
 
 def result(request):
 
+    #load the session variable
     frp = request.session.get('fps_read_proc')
     dtd = request.session.get('det_thres_down')
     video_list = request.session.get('video_list')
     scene_list = request.session.get('scene_list')
+    view = request.session.get('view')
 
+    #request.POST.get(variable) is used to get the variables from the template(html) by their name
     type = request.POST.get('type')
     if type == 'combine':
         to_combine = request.POST.getlist('combine[]')
@@ -68,7 +76,7 @@ def result(request):
             video_list = combine(scene_list, video_list, to_combine,frp[0],frp[1])
             request.session['video_list'] = video_list
             return redirect(result)
-    elif type == 'cut':
+    if type == 'cut':
         vid = int(request.POST.get('v'))
         time = float(request.POST.get('t'))
         if not time == 0:
@@ -76,7 +84,13 @@ def result(request):
             request.session['video_list'] = video_list
             return redirect(result)
 
-    return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list))})
+    new_view = request.POST.get('new_view')
+    print(new_view)
+    if new_view=="work" or new_view=="display":
+        view = new_view
+        request.session['view'] = view
+
+    return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list)), 'view': view})
 
 def test(request):
     file = video_path+'goldeneye.mp4'
