@@ -22,6 +22,24 @@
     }
 </script>
 
+<script>
+    document.getElementById("combine_id").style.position = "absolute";
+</script>
+
+<style>
+#combine_id {
+    position: sticky;
+    top: 20px;
+    right: 20px;
+    background-color: green;
+    color: white;
+}
+#cut_button_id{
+    background-color: red;
+    color: white;
+}
+</style>
+
 <!-- html code -->
 <h1>result page</h1>
 <!-- display the result of the cutting shots process-->
@@ -47,7 +65,7 @@
     <form method="post">
            {% csrf_token %}
             <!-- button used to combine 2 or more shots-->
-           <input id="combine_id" type="submit" value="combine selected shots"/>
+            <input id="combine_id" type="submit" value="combine selected shots"/>
 
             <!-- begin of the shot list-->
             <ul>
