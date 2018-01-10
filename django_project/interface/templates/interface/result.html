@@ -22,21 +22,43 @@
     }
 </script>
 
-<script>
-    document.getElementById("combine_id").style.position = "absolute";
-</script>
-
+<!-- a little bit of css -->
 <style>
 #combine_id {
     position: sticky;
-    top: 20px;
-    right: 20px;
+    top: 10%;
     background-color: green;
     color: white;
+    height: 10%;
 }
 #cut_button_id{
     background-color: red;
     color: white;
+    height: 10%;
+}
+#video_box{
+}
+#option_box {
+    float: right;
+    margin-right: 20%;
+    margin-top: 10%;
+    width: 30%;
+}
+#combine_box{
+    float: right;
+}
+#cut_box{
+    float: left;
+}
+#checkbox_id{
+    float: right;
+    margin-top: 25%;
+}
+#text_id{
+    float: left;
+}
+ul {
+  list-style-type: none;
 }
 </style>
 
@@ -71,18 +93,27 @@
             <ul>
             {% for video in vlist %}
                 <li>
-                  <!-- the actual name of the shot sliced so to get rid of the path-->
-                  <p id="video_name_id">{{video|slice:"19:"}}</p>
-                  <!--  forloop.counter0 is a given counter in django starting at index 0 ... -->
-                  <!-- the id for each video is the counter, source is video in vlist-->
-                  <video id={{forloop.counter0}} width="320" height="240" controls>
-                    <source src={{video}} type="video/mp4">
-                  </video>
-                  <!--cut button and combine box for each video
-                        when user clicks on "cut shot", the javascript function cut_shot is called, with the index of the vid as argument-->
-                  <input id="cut_button_id" type="submit" onclick="cut_shot({{forloop.counter0}})" value="cut shot"/>
-                  <input type="checkbox" name="combine[]" value="{{video}}"/>
+                    <div id="video_box">
+                         <!-- the actual name of the shot sliced so to get rid of the path-->
+                          <p id="video_name_id">{{video|slice:"19:"}}</p>
+                          <!--  forloop.counter0 is a given counter in django starting at index 0 ... -->
+                          <!-- the id for each video is the counter, source is video in vlist-->
+                          <video id={{forloop.counter0}} width="320" height="240" controls>
+                            <source src={{video}} type="video/mp4">
+                          </video>
+                          <!--cut button and combine box for each video
+                            when user clicks on "cut shot", the javascript function cut_shot is called, with the index of the vid as argument-->
+                        <div id="option_box">
+                            <div id="cut_box">
+                                <input id="cut_button_id" type="submit" onclick="cut_shot({{forloop.counter0}})" value="cut shot"/>
+                            </div>
 
+                            <div id="combine_box">
+                                <input id="checkbox_id" type="checkbox" name="combine[]" value="{{video}}"/>
+                                <p id="text_id">combine</p>
+                            </div>
+                        </div>
+                    </div>
                 </li>
             {% endfor %}
             </ul>
