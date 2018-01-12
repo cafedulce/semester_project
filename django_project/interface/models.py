@@ -1,7 +1,8 @@
 from django.db import models
 import os
 
-# Create your models here.
+# here is our video file model
+# it is designed so in order to fit with PySceneDetect
 class VideoFile(models.Model):
 
     name = models.CharField(max_length=255)
@@ -17,6 +18,8 @@ class VideoFile(models.Model):
 
 class PySceneDetectArgs(models.Model):
 
+    # here is our arg model
+    # it is also designed to fit with PySceneDetect
     name = models.CharField(max_length=255)
     detection_method = models.CharField(max_length=255, default='content')
     threshold = models.IntegerField(default=30, null=True)

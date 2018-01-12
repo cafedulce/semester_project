@@ -18,12 +18,12 @@ import csv
 
 def form_cleaner(form):
 
+    #this method is used to get the values given by the user, and prepare them to be used by the detection algorithm
     video_file = VideoFile()
     video_file.video = form.cleaned_data["video"]
     video_file.name = video_file.video_name()
     video_file.path = video_path + video_file.name
     video_file.absolute_path = project_path + video_file.path
-    # video_file.absolute_path = video_file.video.path
     video_file.save()
 
     scenedetect_object = PySceneDetectArgs()
@@ -31,7 +31,6 @@ def form_cleaner(form):
     scenedetect_object.detection_method = form.cleaned_data["type"]
     if form.cleaned_data["threshold"]:
         scenedetect_object.threshold = form.cleaned_data["threshold"]
-    #scenedetect_object.frame_skip = form.cleaned_data["frameskip"]
     if form.cleaned_data["downscale"]:
         scenedetect_object.downscale_factor = form.cleaned_data["downscale"]
 
@@ -44,8 +43,10 @@ def form_cleaner(form):
     return video_file, scenedetect_object
 
 
-### code from PySceneDetect
 def output_file(scene_list, file, video_fps, frames_read):
+
+    #this function comes directly from PyScenDetect, and is a bit adjusted to fit in the webapp
+    # it is used to prepare the timecodes and values to write in the csv file.
 
     scene_list_msec = [(1000.0 * x) / float(video_fps) for x in scene_list]
     scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
@@ -64,12 +65,14 @@ def output_file(scene_list, file, video_fps, frames_read):
 
 def output_scene_list(csv_file, scene_list, scene_list_tc, scene_start_sec,
                       scene_len_sec):
-    ''' Outputs the list of scenes in human-readable format to a CSV file
-        for further analysis. '''
+    #this function is also from PySceneDetect
+
+    # Outputs the list of scenes in human-readable format to a CSV file for further analysis.
+
     # Output timecodes to CSV file if required (and scenes were found).
-    #if args.output and len(scene_list) > 0:
+
     if csv_file and len(scene_list) > 0:
-        csv_writer = csv.writer(csv_file) #args.output)
+        csv_writer = csv.writer(csv_file)
         # Output timecode scene list
         csv_writer.writerow(scene_list_tc)
         # Output detailed, human-readable scene list.
@@ -80,6 +83,8 @@ def output_scene_list(csv_file, scene_list, scene_list_tc, scene_start_sec,
 
 
 def ffmpeg_split(list, filename, fps, read):
+
+    # function that allows the cutting of the video in different shots, that were found just after the PySceneDetect process
 
     #convert mkv file to mp4
     input_name = project_path+video_path+video_target_temp+video_target_format
@@ -100,9 +105,6 @@ def ffmpeg_split(list, filename, fps, read):
         tar= video_path+video_target_name+str(begin)+video_target_format
         media_name_list.append(tar)
         tar = project_path+tar
-        #ffmpeg_extract_subclip(file_path+filename, t1, t2, output_name,name=tar)
-        #cmd = ["ffmpeg","-ss",str(t1),"-i",project_path+video_path+filename,"-t",str(t2),"-codec","copy","-copyts",tar]
-        #cmd = ["ffmpeg", "-i", project_path+video_path+filename, "-ss", str(t1), "-strict", "-2", "-t", str(t2), tar]
         cmd = ["ffmpeg","-i",input_name,"-c:av","copy","-ss",str(t1),"-t",str(t2),"-y",tar]
         subprocess_call(cmd)
 
@@ -118,6 +120,9 @@ def seconds_to_frame(sec, fps):
     return int(sec*fps)
 
 def combine(scene_list, video_list, to_combine_list, fps, read):
+
+    #function that allows the combine of two or more shots in one shot
+
     while len(to_combine_list) >= 2:
         index1 = video_list.index(to_combine_list[0])
         index2 = video_list.index(to_combine_list[1])
@@ -149,6 +154,10 @@ def combine(scene_list, video_list, to_combine_list, fps, read):
     return video_list
 
 def cut(scene_list, video_list, vid, time, fps, read):
+
+    #function that cut shots during the cut&combine part
+    # calls the function statfile_cut to get a precise cut
+
     src = video_list[vid]
     # regex time
     sec = float(re.search('[0-9]+\.([0-9]{1})', str(time)).group(0))
@@ -188,6 +197,8 @@ def update_scenes(scene_list, fps, read):
 
 def statfile_cut(scene_list, vid, time, fps, read):
 
+    #function that return the precise cut time according to the statfile
+
     shot_begin = scene_list[vid]
     shot_end = read if (len(scene_list)<=vid+1) else scene_list[vid+1]
     print("shot end", shot_end)
@@ -217,90 +228,7 @@ def statfile_cut(scene_list, vid, time, fps, read):
         return cut_time
 
 def automatic_threshold():
+
+    #implement here a way to set the threshold dinamically.
+
     pass
-
-"""def split(capture, output_filename, first_frame, last_frame, fps, size):
-
-    video_writer = cv2.VideoWriter(output_filename, cv2.VideoWriter_fourcc('H','2','6','4'), fps, size)
-
-    if not video_writer.isOpened():
-        print('FATAL ERROR - could not open video writer')
-
-    capture.set(cv2.CAP_PROP_POS_FRAMES, first_frame)
-
-    number_of_frames = last_frame-first_frame+1
-
-    while number_of_frames >= 0:
-        ret, im = capture.read()
-        video_writer.write(im)
-        number_of_frames -=1
-
-    return 1
-
-def splitter(filename, scene_list, project_path, output_prefix, frameskip, read):
-
-    name_list = []
-
-    capture = cv2.VideoCapture(filename)
-
-    if not capture.isOpened():
-        print('FATAL ERROR - could not open video')
-        return -1
-
-    fps = capture.get(cv2.CAP_PROP_FPS)
-    ret, image = capture.read()
-    if not ret:
-        print('capure.read() didnt work')
-        return -1
-    h, w, c = image.shape
-    size = (w,h)
-    print scene_list
-    scene_list.append(read)
-    print scene_list
-
-    begin_frame = 0
-    for frame in scene_list:
-        name = output_prefix+str(begin_frame)+'.mp4'
-        name_list.append(name)
-        split(capture, project_path+name, begin_frame, frame-(2+frameskip), fps, size)
-        begin_frame = frame
-
-    return name_list"""
-
-"""def split_input_video(input_path, output_path, smgr, video_fps):
-
-    scene_list_msec = [(1000.0 * x) / float(video_fps) for x in smgr.scene_list]
-    scene_list_tc = [scenedetect.timecodes.get_string(x) for x in scene_list_msec]
-    timecode_list_str = ','.join(scene_list_tc)
-
-    #args.output.close()
-    print('[PySceneDetect] Splitting video into clips...')
-    ret_val = None
-    number=0
-    try:
-        ret_val = subprocess.call(
-            ['mkvmerge',
-             '-o', output_path,
-             '--split', 'timecodes:%s' % timecode_list_str,
-             input_path])
-        number+=1
-    except FileNotFoundError:
-        print('[PySceneDetect] Error: mkvmerge could not be found on the system.'
-              ' Please install mkvmerge to enable video output support.')
-    if ret_val is not None:
-        if ret_val != 0:
-            print('[PySceneDetect] Error splitting video '
-                  '(mkvmerge returned %d).' % ret_val)
-        else:
-            print('[PySceneDetect] Finished writing scenes to output.')
-
-    return number"""
-
-"""def convert_seconds_to_timeformat(a):
-    minute, second = divmod(a, 60)
-    hour, minute = divmod(minute, 60)
-    return str(hour)+str(minute)+str(second)"""
-
-"""def frames_to_timecode(frames, fps):
-    frame = int(frames)
-    return '{0:02d}:{1:02d}:{2:02d}.{3:02d}'.format(int(frame // (3600*fps)), int(frame // (60*fps))%60, int(frame // fps)%60 , int(frame % fps))"""

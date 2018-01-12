@@ -18,16 +18,15 @@ import csv
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-# Create your views here.
+# we only have 2 views -> upload and results
 
 def home(request):
-    #provisory
-    text = """<h1>Django Project homepage</h1>
-                <p> hello </p>"""
-
-    return HttpResponse(text)
+    #dummy view that is not used
+    return render(request)
 
 def upload(request):
+
+    # home view that allows the user to upload a video and set parameters.
 
     uploaded=False
     form = VideoForm(request.POST or None, request.FILES)
@@ -55,6 +54,7 @@ def upload(request):
         request.session['scene_list'] = sc_man.scene_list
         request.session['view'] = "display"
 
+        #reidrect to the result page
         return redirect(result)
 
     return render(request, 'interface/upload.html', {'form': form, 'uploaded': uploaded, 'fps':fps,'read':read, 'processed':processed})
@@ -91,26 +91,3 @@ def result(request):
         request.session['view'] = view
 
     return render(request, 'interface/result.html', {'fps':frp[0],'read':frp[1], 'processed':frp[2], 'det':dtd[0],'thres':dtd[1],'down':dtd[2], 'vlist':video_list,'size': range(len(video_list)), 'view': view})
-
-def test(request):
-    file = video_path+'goldeneye.mp4'
-    time = 0
-    count = 0
-    
-    t = request.POST.getlist('cut[]')
-    c = request.POST.getlist('count')
-    if t:
-        time = t
-    if c:
-        count = c
-    print(time)
-    print(count)
-    print(request.POST)
-    return render(request, 'interface/test.html', {'file':file})
-
-
-def download(request):
-    path_to_file = project_path+'/stats_file'
-    f = open(path_to_file, 'r')
-    response = HttpResponse(f, content_type='application/csv')
-    return response

@@ -1,5 +1,7 @@
 
 
+# some constants that are redundant through the project
+
 project_path = '/home/dulce/semester_project/django_project'
 video_path = '/media/video_files/'
 doc_path = 'media/docs/'
